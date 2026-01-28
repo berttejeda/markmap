@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+<title>Markmap</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+#mindmap {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+.markmap-dark {
+  background: #27272a;
+  color: white;
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.18.12/dist/style.css">
+</head>
+<body>
+<svg id="mindmap"></svg>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script><script src="https://cdn.jsdelivr.net/npm/markmap-view@0.18.12/dist/browser/index.js"></script><script src="https://cdn.jsdelivr.net/npm/markmap-toolbar@0.18.12/dist/index.js"></script><script>((r) => {
+          setTimeout(r);
+        })(() => {
+  const { markmap, mm } = window;
+  const toolbar = new markmap.Toolbar();
+  toolbar.attach(mm);
+  const el = toolbar.render();
+  el.setAttribute("style", "position:absolute;bottom:20px;right:20px");
+  document.body.append(el);
+})</script><script>((getMarkmap) => {
+          const renderMermaidDiagrams = () => {
+            const { mermaid } = window;
+            if (!mermaid) return;
+            const svg = document.querySelector("svg#mindmap");
+            if (!svg) return;
+            const mermaidDivs = Array.from(svg.querySelectorAll(".mermaid"));
+            if (mermaidDivs.length === 0) return;
+            try {
+              if (!mermaid.initialized) {
+                mermaid.initialize({
+                  startOnLoad: false,
+                  theme: "default"
+                });
+              }
+            } catch {
+            }
+            const renderPromises = [];
+            mermaidDivs.forEach((div) => {
+              if (div.textContent && !div.querySelector("svg")) {
+                if (typeof mermaid.run === "function") {
+                  const promise = mermaid.run({
+                    querySelector: null,
+                    nodes: [div]
+                  }).catch((err) => {
+                    console.warn("Mermaid rendering error:", err);
+                  });
+                  renderPromises.push(promise);
+                } else if (typeof mermaid.contentLoaded === "function") {
+                  mermaid.contentLoaded();
+                } else if (typeof mermaid.init === "function") {
+                  mermaid.init(void 0, div);
+                }
+              }
+            });
+            if (renderPromises.length > 0) {
+              Promise.all(renderPromises).then(() => {
+                const markmap2 = getMarkmap();
+                if (markmap2 && markmap2.refreshHook) {
+                  markmap2.refreshHook.call();
+                }
+              });
+            }
+          };
+          const tryRender = () => {
+            const { mermaid } = window;
+            const svg = document.querySelector("svg#mindmap");
+            if (mermaid && svg) {
+              requestAnimationFrame(() => {
+                setTimeout(renderMermaidDiagrams, 100);
+              });
+            }
+          };
+          tryRender();
+          setTimeout(tryRender, 500);
+          setTimeout(tryRender, 1e3);
+          const markmap = getMarkmap();
+          if (markmap && markmap.refreshHook) {
+            markmap.refreshHook.tap(() => {
+              setTimeout(renderMermaidDiagrams, 100);
+            });
+          }
+        })(() => window.markmap)</script><script>((getMarkmap, getOptions, root2, jsonOptions) => {
+              const markmap = getMarkmap();
+              window.mm = markmap.Markmap.create(
+                "svg#mindmap",
+                (getOptions || markmap.deriveOptions)(jsonOptions),
+                root2
+              );
+              if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                document.documentElement.classList.add("markmap-dark");
+              }
+            })(() => window.markmap,null,{"content":"Test Mermaid Diagrams","children":[{"content":"Flowchart","children":[],"payload":{"tag":"h2","lines":"2,3"}},{"content":"Sequence Diagram","children":[],"payload":{"tag":"h2","lines":"13,14"}},{"content":"Gantt Chart","children":[],"payload":{"tag":"h2","lines":"23,24"}}],"payload":{"tag":"h1","lines":"0,1"}},null)</script>
+</body>
+</html>

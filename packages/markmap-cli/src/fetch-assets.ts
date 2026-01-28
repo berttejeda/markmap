@@ -33,9 +33,21 @@ async function fetchAssets({
   const resources = transformer.plugins.flatMap(
     (plugin) => plugin.config?.resources || [],
   );
+  const preloadScripts = transformer.plugins
+    .flatMap(
+      (plugin) =>
+        plugin.config?.preloadScripts?.map((item) => {
+          const url = extractAssets({ scripts: [item] })[0];
+          return url?.startsWith(ASSETS_PREFIX)
+            ? url.slice(ASSETS_PREFIX.length)
+            : null;
+        }) || [],
+    )
+    .filter((path): path is string => path !== null);
   const paths = [
     ...baseJsPaths,
     ...pluginPaths,
+    ...preloadScripts,
     ...resources,
     ...extractAssets(toolbarAssets),
   ];

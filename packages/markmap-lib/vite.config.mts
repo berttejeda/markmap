@@ -21,6 +21,8 @@ const katexResources = (
   .filter((item) => item.endsWith('.woff2'))
   .map((file) => `katex@${katexVersion}/dist/fonts/${file}`);
 
+const mermaidVersion = await getVersion('mermaid');
+
 const define = {
   '__define__.LIB_VERSION': JSON.stringify(pkg.version),
   '__define__.VIEW_VERSION': JSON.stringify(await getVersion('markmap-view')),
@@ -33,6 +35,7 @@ const define = {
   '__define__.WEBFONTLOADER_VERSION': JSON.stringify(
     await getVersion('webfontloader'),
   ),
+  '__define__.MERMAID_VERSION': JSON.stringify(mermaidVersion),
   '__define__.NO_PLUGINS': 'false',
 };
 

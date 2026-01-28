@@ -128,12 +128,14 @@ async function sendStatic(c: Context, realpath: string) {
     const result = await stat(realpath);
     if (!result.isFile()) throw new Error('File not found');
   } catch {
-    return c.body('File not found', 404);
+    return c.text('File not found', 404);
   }
   const stream = createReadStream(realpath);
   const type = getMimeType(realpath);
-  if (type) c.header('content-type', type);
-  return c.body(createStreamBody(stream));
+  const body = createStreamBody(stream);
+  return new Response(body, {
+    headers: type ? { 'content-type': type } : undefined,
+  });
 }
 
 export class MarkmapDevServer {

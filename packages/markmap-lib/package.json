@@ -75,6 +75,7 @@
     "markdown-it-sup": "^2.0.0",
     "markmap-html-parser": "workspace:*",
     "markmap-view": "workspace:*",
+    "mermaid": "^11.0.0",
     "prismjs": "^1.29.0",
     "yaml": "^2.5.1"
   },

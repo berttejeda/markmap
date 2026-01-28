@@ -53,6 +53,10 @@ export interface IHtmlParserOptions {
 }
 
 const defaultSelectorRules: IHtmlParserSelectorRules = {
+  // More specific selectors must come before general ones
+  'div.mermaid': ({ $node, getContent }) => ({
+    ...getContent($node),
+  }),
   'div,p': ({ $node }) => ({
     queue: $node.children(),
   }),
@@ -86,7 +90,7 @@ const defaultSelectorRules: IHtmlParserSelectorRules = {
 };
 
 export const defaultOptions: IHtmlParserOptions = {
-  selector: 'h1,h2,h3,h4,h5,h6,ul,ol,li,table,pre,p>img:only-child',
+  selector: 'h1,h2,h3,h4,h5,h6,ul,ol,li,table,pre,p>img:only-child,div.mermaid',
   selectorRules: defaultSelectorRules,
 };
 
