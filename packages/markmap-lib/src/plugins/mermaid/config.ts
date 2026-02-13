@@ -17,17 +17,10 @@ export const config = {
     {
       type: 'iife',
       data: {
-        fn: (getMarkmap: () => typeof import('markmap-view')) => {
-          const renderMermaidDiagrams = () => {
+        fn: () => {
+          const runMermaid = () => {
             const { mermaid } = window as any;
             if (!mermaid) return;
-
-            // Find all mermaid divs in the SVG foreignObjects
-            const svg = document.querySelector('svg#mindmap');
-            if (!svg) return;
-
-            const mermaidDivs = Array.from(svg.querySelectorAll('.mermaid'));
-            if (mermaidDivs.length === 0) return;
 
             // Initialize mermaid if not already initialized
             try {
@@ -36,20 +29,34 @@ export const config = {
                   startOnLoad: false,
                   theme: 'default',
                 });
+                mermaid.initialized = true;
               }
-            } catch {
-              // mermaid might already be initialized
+            } catch (e) {
+              console.debug('Mermaid initialization:', e);
             }
 
-            // Render all mermaid diagrams that haven't been rendered yet
-            const renderPromises: Promise<any>[] = [];
+            const svg = document.querySelector('svg#mindmap');
+            if (!svg) return;
+
+            const mermaidDivs = Array.from(svg.querySelectorAll('.mermaid'));
             mermaidDivs.forEach((div: Element) => {
               if (div.textContent && !div.querySelector('svg')) {
                 // Only render if not already rendered
-                if (typeof mermaid.run === 'function') {
-                  // mermaid.run() for v10+ - it works on all .mermaid elements by default
-                  // or we can pass specific nodes
-                  const promise = mermaid
+                if (typeof mermaid.render === 'function') {
+                  // mermaid v10+ render API
+                  // We need a unique ID for each diagram
+                  const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                  mermaid
+                    .render(id, div.textContent)
+                    .then(({ svg }) => {
+                      div.innerHTML = svg;
+                    })
+                    .catch((err: any) => {
+                      console.warn('Mermaid rendering error:', err);
+                    });
+                } else if (typeof mermaid.run === 'function') {
+                  // mermaid v10+ run API
+                  mermaid
                     .run({
                       querySelector: null,
                       nodes: [div],
@@ -57,73 +64,64 @@ export const config = {
                     .catch((err: any) => {
                       console.warn('Mermaid rendering error:', err);
                     });
-                  renderPromises.push(promise);
-                } else if (typeof mermaid.contentLoaded === 'function') {
-                  // Older API
-                  mermaid.contentLoaded();
                 } else if (typeof mermaid.init === 'function') {
-                  // Even older API
+                  // Older API
                   mermaid.init(undefined, div);
                 }
               }
             });
+          };
 
-            if (renderPromises.length > 0) {
-              Promise.all(renderPromises).then(() => {
-                const markmap = getMarkmap();
-                if (markmap && markmap.refreshHook) {
-                  markmap.refreshHook.call();
+          const setupObserver = () => {
+            const svg = document.querySelector('svg#mindmap');
+            if (!svg) return;
+
+            const observer = new MutationObserver((mutationsList) => {
+              let shouldRender = false;
+              for (const mutation of mutationsList) {
+                if (
+                  mutation.type === 'childList' &&
+                  mutation.addedNodes.length > 0
+                ) {
+                  for (let i = 0; i < mutation.addedNodes.length; i++) {
+                    const node = mutation.addedNodes[i];
+                    if (node.nodeType === 1) {
+                      // Element
+                      const el = node as Element;
+                      if (
+                        el.classList?.contains('mermaid') ||
+                        el.querySelector?.('.mermaid')
+                      ) {
+                        shouldRender = true;
+                        break;
+                      }
+                    }
+                  }
                 }
-              });
-            }
+                if (shouldRender) break;
+              }
+
+              if (shouldRender) {
+                runMermaid();
+              }
+            });
+
+            observer.observe(svg, { childList: true, subtree: true });
           };
 
           // Wait for both mermaid and markmap to be ready
-          const tryRender = () => {
+          const checkReady = () => {
             const { mermaid } = window as any;
             const svg = document.querySelector('svg#mindmap');
             if (mermaid && svg) {
-              // Use requestAnimationFrame to ensure DOM is ready
-              requestAnimationFrame(() => {
-                setTimeout(renderMermaidDiagrams, 100);
-              });
-            }
-          };
-
-          // Try immediately
-          tryRender();
-
-          // Also try after a delay in case scripts load asynchronously
-          setTimeout(tryRender, 500);
-          setTimeout(tryRender, 1000);
-
-          // Hook into markmap refresh to re-render mermaid diagrams
-          // Wait for markmap instance to be created
-          const hookIntoMarkmap = () => {
-            const markmap = getMarkmap();
-            const mm = (window as any).mm;
-            if (markmap && markmap.refreshHook) {
-              markmap.refreshHook.tap(() => {
-                setTimeout(renderMermaidDiagrams, 100);
-              });
-              // Also render immediately if markmap is already created
-              if (mm) {
-                setTimeout(renderMermaidDiagrams, 200);
-              }
-            } else if (mm) {
-              // Markmap instance exists, hook into it
-              if (mm.refreshHook) {
-                mm.refreshHook.tap(() => {
-                  setTimeout(renderMermaidDiagrams, 100);
-                });
-                setTimeout(renderMermaidDiagrams, 200);
-              }
+              runMermaid();
+              setupObserver();
             } else {
-              // Retry if markmap isn't ready yet
-              setTimeout(hookIntoMarkmap, 100);
+              setTimeout(checkReady, 100);
             }
           };
-          hookIntoMarkmap();
+
+          checkReady();
         },
         getParams({ getMarkmap }) {
           return [getMarkmap];
