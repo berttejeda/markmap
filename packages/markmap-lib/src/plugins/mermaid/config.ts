@@ -18,6 +18,23 @@ export const config = {
       type: 'iife',
       data: {
         fn: () => {
+          const styleId = 'markmap-mermaid-css';
+          if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+.mermaid {
+  transform: scale(0.8);
+  transform-origin: top left;
+}
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+`;
+            document.head.appendChild(style);
+          }
+
           const runMermaid = () => {
             const { mermaid } = window as any;
             if (!mermaid) return;
