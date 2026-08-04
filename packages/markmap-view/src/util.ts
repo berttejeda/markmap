@@ -51,11 +51,19 @@ export function deriveOptions(jsonOptions?: Partial<IMarkmapJSONOptions>) {
     if (typeof value === 'number') derivedOptions[key] = value;
   });
 
-  const booleanKeys = ['zoom', 'pan'] as const;
+  const booleanKeys = ['zoom', 'pan', 'checkboxPersistence'] as const;
   booleanKeys.forEach((key) => {
     const value = options[key];
     if (value != null) derivedOptions[key] = !!value;
   });
+
+  const { extraCss } = options;
+  if (extraCss?.length) {
+    const cssText = extraCss
+      .map((s) => s.replace(/<\/?style[^>]*>/gi, ''))
+      .join('\n');
+    derivedOptions.style = () => cssText;
+  }
 
   return derivedOptions;
 }

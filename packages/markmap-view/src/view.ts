@@ -29,6 +29,19 @@ import {
   IPadding,
 } from './types';
 import { childSelector, simpleHash } from './util';
+import { CheckboxPersistenceManager } from './checkbox-persistence';
+
+// Re-export checkbox persistence utilities for external use
+export {
+  CheckboxPersistenceManager,
+  type CheckboxStates,
+  getCheckboxId,
+  loadCheckboxStates,
+  saveCheckboxStates,
+  replaceSVGWithCheckbox,
+  processCheckboxes,
+  clearCheckboxStates,
+} from './checkbox-persistence';
 
 export const globalCSS = css;
 
@@ -69,6 +82,8 @@ export class Markmap {
 
   private _disposeList: (() => void)[] = [];
 
+  private _checkboxManager?: CheckboxPersistenceManager;
+
   constructor(
     svg: string | SVGElement | ID3SVGElement,
     opts?: Partial<IMarkmapOptions>,
@@ -104,6 +119,17 @@ export class Markmap {
       }),
       () => this._observer.disconnect(),
     );
+    this._initCheckboxPersistence();
+  }
+
+  private _initCheckboxPersistence(): void {
+    if (this.options.checkboxPersistence) {
+      const svgNode = this.svg.node();
+      if (svgNode) {
+        this._checkboxManager = new CheckboxPersistenceManager(svgNode);
+        this._checkboxManager.init();
+      }
+    }
   }
 
   getStyleContent(): string {
@@ -271,6 +297,7 @@ export class Markmap {
   }
 
   setOptions(opts?: Partial<IMarkmapOptions>): void {
+    const oldCheckboxPersistence = this.options.checkboxPersistence;
     this.options = {
       ...this.options,
       ...opts,
@@ -284,6 +311,23 @@ export class Markmap {
       this.svg.on('wheel', this.handlePan);
     } else {
       this.svg.on('wheel', null);
+    }
+    if (
+      opts?.checkboxPersistence !== undefined &&
+      oldCheckboxPersistence !== this.options.checkboxPersistence
+    ) {
+      if (this.options.checkboxPersistence) {
+        this._initCheckboxPersistence();
+      } else {
+        this._destroyCheckboxPersistence();
+      }
+    }
+  }
+
+  private _destroyCheckboxPersistence(): void {
+    if (this._checkboxManager) {
+      this._checkboxManager.destroy();
+      this._checkboxManager = undefined;
     }
   }
 
@@ -603,6 +647,14 @@ export class Markmap {
       });
 
     if (autoFit) this.fit();
+
+    // Process checkboxes after rendering if persistence is enabled
+    if (this._checkboxManager) {
+      // Delay processing to ensure DOM is fully updated
+      setTimeout(() => {
+        this._checkboxManager?.process();
+      }, 0);
+    }
   }
 
   transition<T extends d3.BaseType, U, P extends d3.BaseType, Q>(
@@ -756,11 +808,33 @@ export class Markmap {
   }
 
   destroy() {
+    this._destroyCheckboxPersistence();
     this.svg.on('.zoom', null);
     this.svg.html(null);
     this._disposeList.forEach((fn) => {
       fn();
     });
+  }
+
+  /**
+   * Get the current checkbox states (if checkbox persistence is enabled)
+   */
+  getCheckboxStates() {
+    return this._checkboxManager?.getStates() || {};
+  }
+
+  /**
+   * Clear all saved checkbox states (if checkbox persistence is enabled)
+   */
+  clearCheckboxStates(): void {
+    this._checkboxManager?.clearStates();
+  }
+
+  /**
+   * Manually process checkboxes (if checkbox persistence is enabled)
+   */
+  processCheckboxes(): number {
+    return this._checkboxManager?.process() || 0;
   }
 
   static create(

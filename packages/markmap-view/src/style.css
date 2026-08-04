@@ -98,7 +98,7 @@
   }
 }
 
-.markmap-dark .markmap {
+:where(.markmap-dark) .markmap {
   --markmap-code-bg: #1a1b26;
   --markmap-code-color: #ddd;
   --markmap-circle-open-bg: #444;

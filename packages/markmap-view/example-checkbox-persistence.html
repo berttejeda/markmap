@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markmap Checkbox Persistence Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #e0e0e0;
+        }
+        #markmap-container {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        .info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Markmap Checkbox Persistence Demo</h1>
+    
+    <div class="controls">
+        <button onclick="togglePersistence()">Toggle Persistence</button>
+        <button onclick="showStates()">Show States</button>
+        <button onclick="clearStates()">Clear States</button>
+        <button onclick="processCheckboxes()">Process Checkboxes</button>
+        <span id="status">Persistence: <strong id="persistence-status">disabled</strong></span>
+    </div>
+
+    <div class="info">
+        <strong>Instructions:</strong> Check/uncheck the checkboxes below. With persistence enabled, 
+        your selections will be saved and restored when you reload the page. Try it:
+        <ol>
+            <li>Enable persistence using the toggle button</li>
+            <li>Check some checkboxes</li>
+            <li>Reload the page</li>
+            <li>Your selections will be restored!</li>
+        </ol>
+    </div>
+
+    <div id="markmap-container">
+        <svg id="markmap"></svg>
+    </div>
+
+    <!-- This example uses the built library - in production, load from your dist folder -->
+    <script type="module">
+        // In a real app, you would import from your built library:
+        // import { Markmap } from './dist/index.js';
+        
+        // For this example, we'll simulate the markmap data structure
+        const sampleData = {
+            content: 'Root',
+            children: [
+                {
+                    content: '- [ ] Task 1',
+                    children: [
+                        { content: '- [ ] Subtask 1.1' },
+                        { content: '- [ ] Subtask 1.2' },
+                        { content: '- [ ] Subtask 1.3' }
+                    ]
+                },
+                {
+                    content: '- [ ] Task 2',
+                    children: [
+                        { content: '- [ ] Subtask 2.1' },
+                        { content: '- [ ] Subtask 2.2' }
+                    ]
+                },
+                {
+                    content: '- [ ] Task 3',
+                    children: [
+                        { content: '- [ ] Subtask 3.1' },
+                        { content: '- [ ] Subtask 3.2' },
+                        { content: '- [ ] Subtask 3.3' },
+                        { content: '- [ ] Subtask 3.4' }
+                    ]
+                }
+            ]
+        };
+
+        // Global markmap instance
+        let mm;
+
+        // Initialize markmap (you'll need to include the actual markmap library)
+        async function initMarkmap() {
+            const svg = document.getElementById('markmap');
+            
+            // NOTE: This is pseudo-code. In real usage:
+            // mm = Markmap.create(svg, { checkboxPersistence: false });
+            // await mm.setData(sampleData);
+            
+            console.log('Markmap would be initialized here');
+            console.log('Data:', sampleData);
+            
+            // Update UI
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const status = mm?.options?.checkboxPersistence || false;
+            document.getElementById('persistence-status').textContent = status ? 'enabled' : 'disabled';
+            document.getElementById('persistence-status').style.color = status ? 'green' : 'red';
+        }
+
+        window.togglePersistence = function() {
+            if (!mm) {
+                alert('Markmap not initialized. Include the markmap-view library to use this demo.');
+                return;
+            }
+            const newState = !mm.options.checkboxPersistence;
+            mm.setOptions({ checkboxPersistence: newState });
+            updateStatus();
+            console.log('Checkbox persistence:', newState);
+        };
+
+        window.showStates = function() {
+            if (!mm) {
+                alert('Markmap not initialized. Include the markmap-view library to use this demo.');
+                return;
+            }
+            const states = mm.getCheckboxStates();
+            console.log('Checkbox states:', states);
+            alert('Checkbox states:\n' + JSON.stringify(states, null, 2));
+        };
+
+        window.clearStates = function() {
+            if (!mm) {
+                alert('Markmap not initialized. Include the markmap-view library to use this demo.');
+                return;
+            }
+            if (confirm('Clear all saved checkbox states?')) {
+                mm.clearCheckboxStates();
+                console.log('Cleared all checkbox states');
+                alert('All checkbox states cleared!');
+                // Optionally reload to see the effect
+                if (confirm('Reload page to see the effect?')) {
+                    location.reload();
+                }
+            }
+        };
+
+        window.processCheckboxes = function() {
+            if (!mm) {
+                alert('Markmap not initialized. Include the markmap-view library to use this demo.');
+                return;
+            }
+            const count = mm.processCheckboxes();
+            console.log('Processed checkboxes:', count);
+            alert(`Processed ${count} checkbox(es)`);
+        };
+
+        // Initialize on load
+        initMarkmap();
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 4px; font-size: 13px;">
+        <strong>⚠️ Note:</strong> This is a demo HTML file. To actually see the checkbox persistence in action, 
+        you need to:
+        <ol>
+            <li>Build the markmap-view package: <code>pnpm build</code></li>
+            <li>Include the built library in this file</li>
+            <li>Replace the pseudo-code with actual Markmap initialization</li>
+        </ol>
+        See <code>CHECKBOX_PERSISTENCE.md</code> for detailed usage instructions.
+    </div>
+</body>
+</html>
+

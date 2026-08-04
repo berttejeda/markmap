@@ -19,6 +19,68 @@ Markmap is also available in:
 - Emacs: [eaf-markmap](https://github.com/emacs-eaf/eaf-markmap) -- powered by [EAF](https://github.com/emacs-eaf/emacs-application-framework)
 - MCP Server: [markmap-mcp-server](https://github.com/jinzcdev/markmap-mcp-server) [![NPM Version](https://img.shields.io/npm/v/@jinzcdev/markmap-mcp-server.svg)](https://www.npmjs.com/package/@jinzcdev/markmap-mcp-server) - powered by [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 
+## Mermaid Diagrams
+
+Markmap supports rendering [Mermaid](https://mermaid.js.org/) diagrams inline within mindmap nodes. Use standard fenced code blocks with the `mermaid` language identifier:
+
+````markdown
+## My Topic
+
+```mermaid
+flowchart LR
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Action]
+    B -->|No| D[Other]
+```
+````
+
+The mermaid diagram will appear as a child node of the heading and render automatically.
+
+### Supported Diagram Types
+
+All Mermaid diagram types are supported, including:
+
+- **Flowcharts** — `flowchart` / `graph`
+- **Sequence diagrams** — `sequenceDiagram`
+- **Gantt charts** — `gantt`
+- **Class diagrams** — `classDiagram`
+- **State diagrams** — `stateDiagram-v2`
+- **And more** — any diagram type supported by Mermaid
+
+### Customizing Diagram Styles
+
+You can override the default mermaid diagram styles per-document using YAML frontmatter with `extraCss`:
+
+````markdown
+---
+markmap:
+  extraCss:
+    - |
+      <style>
+      .mermaid .edge-pattern-solid,
+      .mermaid .flowchart-link {
+        stroke: #222 !important;
+        stroke-width: 2.5px !important;
+      }
+      .mermaid marker path {
+        fill: #222 !important;
+      }
+      </style>
+---
+
+# My Mindmap
+````
+
+This is useful for adjusting line thickness, colors, or other visual properties of rendered diagrams. The CSS targets Mermaid's internal SVG elements:
+
+| Selector | What it styles |
+|---|---|
+| `.mermaid .edge-pattern-solid` | Flowchart connector lines |
+| `.mermaid .flowchart-link` | Flowchart connector lines (alt class) |
+| `.mermaid marker path` | Arrowhead markers on connectors |
+| `.mermaid .node rect` | Node background rectangles |
+| `.mermaid .label` | Text labels inside nodes |
+
 ## Usage
 
 👉 [Read the documentation](https://markmap.js.org/docs) for more detail.

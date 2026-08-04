@@ -25,6 +25,7 @@ export interface IMarkmapJSONOptions {
   initialExpandLevel: number;
   maxInitialScale: number;
   maxWidth: number;
+  mermaid: Record<string, unknown>;
   nodeMinHeight: number;
   paddingX: number;
   pan: boolean;
@@ -32,6 +33,7 @@ export interface IMarkmapJSONOptions {
   spacingVertical: number;
   zoom: boolean;
   lineWidth: number | number[];
+  checkboxPersistence: boolean;
 }
 
 export interface IMarkmapOptions {
@@ -47,6 +49,7 @@ export interface IMarkmapOptions {
   style?: (id: string) => string;
   toggleRecursively: boolean;
   zoom: boolean;
+  checkboxPersistence: boolean;
 
   // Theme options
   color: (node: INode) => string;

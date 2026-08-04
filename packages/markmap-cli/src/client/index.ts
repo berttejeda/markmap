@@ -42,6 +42,10 @@ async function checkData() {
     const res = (await resp.json()) as IFileState;
     if (res.content) {
       const value = res.content.value as ITransformResult;
+      // Set mermaid config from frontmatter before rendering
+      if (value.frontmatter?.markmap?.mermaid) {
+        (window as any).__mermaidConfig = value.frontmatter.markmap.mermaid;
+      }
       mm.setOptions(markmap.deriveOptions(value.frontmatter?.markmap));
       await mm.setData(value.root);
       if (!state.content.ts) await mm.fit();

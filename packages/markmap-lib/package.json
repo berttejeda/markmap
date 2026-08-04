@@ -61,6 +61,7 @@
     "@types/katex": "^0.16.7",
     "@types/markdown-it": "^14.0.0",
     "markmap-common": "workspace:*",
+    "mermaid": "^11.4.1",
     "webfontloader": "^1.6.28"
   },
   "dependencies": {

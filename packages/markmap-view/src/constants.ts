@@ -23,6 +23,7 @@ export const defaultOptions: IMarkmapOptions = {
   zoom: true,
   pan: true,
   toggleRecursively: false,
+  checkboxPersistence: false,
 
   color: (node: INode): string => defaultColorFn(`${node.state?.path || ''}`),
   lineWidth: lineWidthFactory(),
