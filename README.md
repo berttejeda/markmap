@@ -81,19 +81,19 @@ This is useful for adjusting line thickness, colors, or other visual properties 
 | `.mermaid .node rect` | Node background rectangles |
 | `.mermaid .label` | Text labels inside nodes |
 
-## Installing from this Fork
+## Installing directly from this repo
 
-Since this fork is not published to npm, install packages directly from the git repository using pnpm's git + subdirectory syntax:
+You can install markmap directly from the git repository using pnpm's git + subdirectory syntax:
 
 ```bash
-pnpm add "markmap-cli@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-cli"
+pnpm add "markmap-cli@github:markmap/markmap&path:packages/markmap-cli"
 ```
 
 Other packages in this monorepo (e.g. `markmap-lib`, `markmap-view`) can be installed the same way by changing the `path:` segment:
 
 ```bash
-pnpm add "markmap-lib@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-lib"
-pnpm add "markmap-view@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-view"
+pnpm add "markmap-lib@github:markmap/markmap#feature-mermaid&path:packages/markmap-lib"
+pnpm add "markmap-view@github:markmap/markmap#feature-mermaid&path:packages/markmap-view"
 ```
 
 **How it works**: pnpm clones the full repository, detects the `pnpm-workspace.yaml`, and runs `pnpm install` at the repo root so internal `workspace:*` dependencies (e.g. `markmap-common`) resolve correctly. It then runs each package's `prepare` script to build `dist/` output, since built files are gitignored and not committed.
