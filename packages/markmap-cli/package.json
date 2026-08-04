@@ -30,7 +30,8 @@
     "build:js": "vite build && pnpm fetch-assets",
     "build": "pnpm clean && pnpm /^build:/",
     "fetch-assets": "node ./dist/fetch-assets.js",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "prepare": "pnpm build"
   },
   "bugs": {
     "url": "https://github.com/markmap/markmap/issues"

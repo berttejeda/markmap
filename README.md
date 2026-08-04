@@ -21,7 +21,7 @@ Markmap is also available in:
 
 ## Mermaid Diagrams
 
-Markmap supports rendering [Mermaid](https://mermaid.js.org/) diagrams inline within mindmap nodes. Use standard fenced code blocks with the `mermaid` language identifier:
+This fork of Markmap supports rendering [Mermaid](https://mermaid.js.org/) diagrams inline within mindmap nodes. Use standard fenced code blocks with the `mermaid` language identifier:
 
 ````markdown
 ## My Topic
@@ -80,6 +80,25 @@ This is useful for adjusting line thickness, colors, or other visual properties 
 | `.mermaid marker path` | Arrowhead markers on connectors |
 | `.mermaid .node rect` | Node background rectangles |
 | `.mermaid .label` | Text labels inside nodes |
+
+## Installing from this Fork
+
+Since this fork is not published to npm, install packages directly from the git repository using pnpm's git + subdirectory syntax:
+
+```bash
+pnpm add "markmap-cli@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-cli"
+```
+
+Other packages in this monorepo (e.g. `markmap-lib`, `markmap-view`) can be installed the same way by changing the `path:` segment:
+
+```bash
+pnpm add "markmap-lib@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-lib"
+pnpm add "markmap-view@github:berttejeda/markmap#feature-mermaid&path:packages/markmap-view"
+```
+
+**How it works**: pnpm clones the full repository, detects the `pnpm-workspace.yaml`, and runs `pnpm install` at the repo root so internal `workspace:*` dependencies (e.g. `markmap-common`) resolve correctly. It then runs each package's `prepare` script to build `dist/` output, since built files are gitignored and not committed.
+
+**Note**: If a package you need doesn't yet have a `prepare` script defined, add `"prepare": "pnpm build"` to its `package.json` under `scripts` so the install step builds it automatically.
 
 ## Usage
 
